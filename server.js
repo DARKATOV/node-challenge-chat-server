@@ -39,7 +39,7 @@ function getNextId() {
 }
 
 function validMessage(message) {
-  if (message.text && message.from) {
+  if (message.text && message.from && message !== null) {  // revision de formato de body 
     return true;
   }
   return false;
@@ -51,14 +51,6 @@ app.get("/", function (request, response) {
 
 app.get("/messages", (request, response) => {
   response.status(201).send(messages);
-});
-
-app.get("/messages/search/:word", (request, response) => {
-  const searchTerm = request.params.word;
-  console.log(searchTerm);
-  const resultSearch = messages.filter(item => item.text.includes(searchTerm))
-  console.log(resultSearch);
-  response.status(200).send(resultSearch);
 });
 
 app.get("/messages/latest", (request, response) => {
@@ -78,7 +70,17 @@ app.get("/messages/:id", (request, response) => {
   }
 });
 
+app.get("/messages/search/:word", (request, response) => {
+  const searchTerm = request.params.word;
+  console.log(searchTerm);
+  const resultSearch = messages.filter(item => item.text.includes(searchTerm))
+  console.log(resultSearch);
+  response.status(200).send(resultSearch);
+});
+
+
 // middle ware ? solo cuando quiero sacar el body ? 
+// rechazar solicitud formato text 
 
 app.post("/messages", (request, response) => {
   const message = {
@@ -110,6 +112,24 @@ app.put("/messages/:id", (request, response) => {
     message.text = newMessage.text;
     message.timeSent = new Date();
     response.status(201).send(message);
+});
+
+app.delete("/messages/:id", (request, response) => {
+  const searchId = parseInt(request.params.id);
+  console.log(searchId);
+  let message = messagesToTry.find((item)=>item.id === searchId)  // findIndex() returns -1 if item is not found, but -1 should not be used as index: negative number is not a valid position
+  console.log(message);
+  if(message === undefined){
+    response.status(404).send(`Does not exist ID register`);
+    return;
+  }
+  let index = messagesToTry.findIndex(item => item.id === searchId);
+  if (!message) {
+    response.status(404).send();
+    return;
+  }
+  messagesToTry.splice(index, 1);
+  response.status(201).send(`${message} was delete`);
 });
 
 app.listen(3000, () => {
