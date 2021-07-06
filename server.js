@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+//moment
 const app = express();
 
 app.use(cors());
@@ -27,23 +27,23 @@ let messages = [alphaMessage];
 // temp memory 
 
 //no use 
-// function getNextId() {
-//   const lastMessageIndex = messages.length - 1;
-//   if (lastMessageIndex === -1) {
-//     return 0;
-//   } else {
-//     const nextId = lastMessageIndex + 1;
-//     return nextId;
-//   }
-//   // for json object, the id has to be a string: nextId.toString();
-// }
+function getNextId() {
+  const lastMessageIndex = messages.length - 1;
+  if (lastMessageIndex === -1) {
+    return 0;
+  } else {
+    const nextId = lastMessageIndex + 1;
+    return nextId;
+  }
+  // for json object, the id has to be a string: nextId.toString();
+}
 
-// function isValidMessage(message) {
-//   if (message.text && message.from) {
-//     return true;
-//   }
-//   return false;
-// }
+function validMessage(message) {
+  if (message.text && message.from) {
+    return true;
+  }
+  return false;
+}
 
 app.get("/", function (request, response) {
   response.sendFile(__dirname + "/index.html"); // que es dirname
@@ -78,16 +78,16 @@ app.get("/messages/:id", (request, response) => {
   }
 });
 
+// middle ware ? solo cuando quiero sacar el body ? 
+
 app.post("/messages", (request, response) => {
   const message = {
     id:  getNextId(),
     from: request.body.from,
     text: request.body.text,
+    timeSent: new Date()
   };
-  // add timestamp to each new message
-  message.timeSent = new Date()
-
-  if (!isValidMessage(message)) {
+  if (!validMessage(message)) {
     response.status(404).send("This message is not complete.");
     return;
   }
@@ -96,31 +96,20 @@ app.post("/messages", (request, response) => {
 });
 
 app.put("/messages/:id", (request, response) => {
-  const messageId = parseInt(request.params.id);
-  let updatedMessage = request.body;
-
-  let message = messages.find((message) => message.id === messageId);
+  const searchId = parseInt(request.params.id);
+  console.log(searchId);
+  let newMessage = request.body;
+  let message = messagesToTry.find((item) => item.id === searchId);
+  console.log(message);
+  // let message = messagesToTry.find((item) => item.id === searchId);
+  // console.log(message);
   if (!message) {
     response.status(404).send("This message does not exist");
   }
-    message.from = updatedMessage.from;
-    message.text = updatedMessage.text;
-    timeSent = message.timeSent
-    response.status(201).send(updatedMessage);
-});
-
-app.delete("/messages/:id", (request, response) => {
-  const messageId = request.params.id;
-
-  const index = messages.findIndex((message) => message.id == messageId);
-  // findIndex() returns -1 if item is not found, but -1 should not be used as index: negative number is not a valid position
-  if (index === -1) {
-    res.status(404).send();
-    return;
-  }
-  // remove one item starting from the index that is found
-  messages.splice(index, 1);
-  res.status(201).send({ success: true });
+    message.from = newMessage.from;
+    message.text = newMessage.text;
+    message.timeSent = new Date();
+    response.status(201).send(message);
 });
 
 app.listen(3000, () => {
