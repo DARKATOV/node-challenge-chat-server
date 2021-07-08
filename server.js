@@ -23,7 +23,7 @@ const messagesToTry = [
 ];
 
 const alphaMessage = { id: 0, from: "matrix", text: "Welcome to CYF chat system!" }
-let messages = [alphaMessage];
+let messages = messagesToTry;
 // temp memory 
 
 //no use 
